@@ -97,3 +97,18 @@ func (s *suiteNtsLRU) TestPutCache() {
 	s.True(ok)
 	s.Equal(10, r)
 }
+
+func (s *suiteNtsLRU) TestTSVersion() {
+	c := NewLRU[int, int](3, nil)
+	c.Put(1, 1)
+
+	r, ok := c.Get(1, 0)
+	s.True(ok)
+	s.Equal(1, r)
+
+	c.Delete(1)
+
+	r, ok = c.Get(1, 0)
+	s.False(ok)
+	s.Equal(0, r)
+}

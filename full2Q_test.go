@@ -55,3 +55,18 @@ func (s *suiteNtsFull2Q) TestFill() {
 		s.Equal(0, r)
 	}
 }
+
+func (s *suiteNtsFull2Q) TestTSVersion() {
+	c := NewFull2Q[int, int](3, 2, 10)
+	c.Put(1, 1)
+
+	r, ok := c.Get(1, 0)
+	s.True(ok)
+	s.Equal(1, r)
+
+	c.Delete(1)
+
+	r, ok = c.Get(1, 0)
+	s.False(ok)
+	s.Equal(0, r)
+}

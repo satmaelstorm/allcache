@@ -1,6 +1,39 @@
 package allcache
 
-import "github.com/satmaelstorm/list"
+import (
+	"github.com/satmaelstorm/list"
+	"sync"
+)
+
+// Full2Q - full version 2Q - @see http://www.vldb.org/conf/1994/P439.PDF
+type Full2Q[K comparable, T any] struct {
+	cache *ntsFull2Q[K, T]
+	lock  sync.Mutex
+}
+
+func NewFull2Q[K comparable, T any](amSize, a1InSize, a1OutSize int64) Cache[K, T] {
+	cache := new(Full2Q[K, T])
+	cache.cache = newNtsFull2Q[K, T](amSize, a1InSize, a1OutSize)
+	return cache
+}
+
+func (c *Full2Q[K, T]) Put(key K, item T) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	c.cache.put(key, item)
+}
+
+func (c *Full2Q[K, T]) Get(key K, def T) (T, bool) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	return c.cache.get(key, def)
+}
+
+func (c *Full2Q[K, T]) Delete(key K) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	c.cache.delete(key)
+}
 
 //non thead safe full version 2Q - @see http://www.vldb.org/conf/1994/P439.PDF
 type ntsFull2Q[K comparable, T any] struct {
@@ -109,8 +142,10 @@ func (c *ntsFull2Q[K, T]) delete(key K) {
 		} else {
 			c.a1in.Remove(e)
 		}
+		delete(c.items, key)
 	}
 	if e, ok := c.itemsOut[key]; ok {
 		c.a1out.Remove(e)
+		delete(c.itemsOut, key)
 	}
 }

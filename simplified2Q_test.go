@@ -81,3 +81,18 @@ func (s *suiteNtsSimplified2Q) TestPut() {
 	s.True(ok)
 	s.Equal(10, r)
 }
+
+func (s *suiteNtsSimplified2Q) TestTSVersion() {
+	c := NewSimplified2Q[int, int](3, 2)
+	c.Put(1, 1)
+
+	r, ok := c.Get(1, 0)
+	s.True(ok)
+	s.Equal(1, r)
+
+	c.Delete(1)
+
+	r, ok = c.Get(1, 0)
+	s.False(ok)
+	s.Equal(0, r)
+}
