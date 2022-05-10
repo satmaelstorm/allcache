@@ -15,7 +15,7 @@ func TestNtsSimplified2Q(t *testing.T) {
 }
 
 func (s *suiteNtsSimplified2Q) SetupTest() {
-	s.cache = newNtsSimplified2Q[string, int](2, 3)
+	s.cache = newNtsSimplified2Q[string, int](3, 2)
 	s.cache.put("1", 1)
 	s.cache.get("1", 0)
 	s.cache.put("2", 2)
@@ -68,4 +68,16 @@ func (s *suiteNtsSimplified2Q) TestEvict() {
 	r, ok = s.cache.get("1", 0)
 	s.False(ok)
 	s.Equal(0, r)
+}
+
+func (s *suiteNtsSimplified2Q) TestPut() {
+	r, ok := s.cache.get("5", 0)
+	s.True(ok)
+	s.Equal(5, r)
+
+	s.cache.put("5", 10)
+
+	r, ok = s.cache.get("5", 0)
+	s.True(ok)
+	s.Equal(10, r)
 }

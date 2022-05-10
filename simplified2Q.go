@@ -11,9 +11,9 @@ type Simplified2Q[K comparable, T any] struct {
 	lock  sync.Mutex
 }
 
-func NewSimplified2Q[K comparable, T any](a1Size, amSize int64) Cache[K, T] {
+func NewSimplified2Q[K comparable, T any](amSize, a1Size int64) Cache[K, T] {
 	cache := new(Simplified2Q[K, T])
-	cache.cache = newNtsSimplified2Q[K, T](a1Size, amSize)
+	cache.cache = newNtsSimplified2Q[K, T](amSize, a1Size)
 	return cache
 }
 
@@ -48,7 +48,7 @@ type ntsSimplified2Q[K comparable, T any] struct {
 	totalSize int64
 }
 
-func newNtsSimplified2Q[K comparable, T any](a1Size, amSize int64) *ntsSimplified2Q[K, T] {
+func newNtsSimplified2Q[K comparable, T any](amSize, a1Size int64) *ntsSimplified2Q[K, T] {
 	return &ntsSimplified2Q[K, T]{
 		items:     make(map[K]*list.Node[cacheEntry2Q[K, T]], a1Size+amSize),
 		am:        list.NewQueue[cacheEntry2Q[K, T]](),
