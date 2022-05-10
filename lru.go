@@ -11,7 +11,7 @@ type LRU[K comparable, T any] struct {
 }
 
 func NewLRU[K comparable, T any](
-	maxSize int64,
+	maxSize uint64,
 	calcSize SizeCalculator[T],
 ) Cache[K, T] {
 	lru := new(LRU[K, T])
@@ -41,17 +41,17 @@ func (c *LRU[K, T]) Delete(key K) {
 type ntsLRU[K comparable, T any] struct {
 	items      map[K]*list.Node[cacheEntry[K, T]]
 	evictQueue *list.Queue[cacheEntry[K, T]]
-	length     int64
-	maxSize    int64
+	length     uint64
+	maxSize    uint64
 	sizeCalc   SizeCalculator[T]
 }
 
 func newNtsLRU[K comparable, T any](
-	maxSize int64,
+	maxSize uint64,
 	sizeCalc SizeCalculator[T],
 ) *ntsLRU[K, T] {
 	if nil == sizeCalc {
-		sizeCalc = func(T) int64 { return 1 }
+		sizeCalc = func(T) uint64 { return 1 }
 	}
 	return &ntsLRU[K, T]{
 		items:      make(map[K]*list.Node[cacheEntry[K, T]], maxSize),

@@ -11,7 +11,7 @@ type Simplified2Q[K comparable, T any] struct {
 	lock  sync.Mutex
 }
 
-func NewSimplified2Q[K comparable, T any](amSize, a1Size int64) Cache[K, T] {
+func NewSimplified2Q[K comparable, T any](amSize, a1Size uint64) Cache[K, T] {
 	cache := new(Simplified2Q[K, T])
 	cache.cache = newNtsSimplified2Q[K, T](amSize, a1Size)
 	return cache
@@ -41,14 +41,12 @@ type ntsSimplified2Q[K comparable, T any] struct {
 	items     map[K]*list.Node[cacheEntry2Q[K, T]]
 	am        *list.Queue[cacheEntry2Q[K, T]]
 	a1        *list.Queue[cacheEntry2Q[K, T]]
-	a1Size    int64
-	amSize    int64
-	a1Length  int64
-	amLength  int64
-	totalSize int64
+	a1Size    uint64
+	amSize    uint64
+	totalSize uint64
 }
 
-func newNtsSimplified2Q[K comparable, T any](amSize, a1Size int64) *ntsSimplified2Q[K, T] {
+func newNtsSimplified2Q[K comparable, T any](amSize, a1Size uint64) *ntsSimplified2Q[K, T] {
 	return &ntsSimplified2Q[K, T]{
 		items:     make(map[K]*list.Node[cacheEntry2Q[K, T]], a1Size+amSize),
 		am:        list.NewQueue[cacheEntry2Q[K, T]](),
@@ -102,11 +100,11 @@ func (c *ntsSimplified2Q[K, T]) put(key K, value T) {
 		c.items[key] = c.a1.Tail()
 	}()
 
-	if c.totalSize > int64(c.a1.Len()+c.am.Len()) {
+	if c.totalSize > uint64(c.a1.Len()+c.am.Len()) {
 		return
 	}
 
-	if c.a1Size <= int64(c.a1.Len()) {
+	if c.a1Size <= uint64(c.a1.Len()) {
 		e := c.a1.Dequeue()
 		if e != nil {
 			delete(c.items, e.Value().key)

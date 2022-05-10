@@ -11,7 +11,7 @@ type Full2Q[K comparable, T any] struct {
 	lock  sync.Mutex
 }
 
-func NewFull2Q[K comparable, T any](amSize, a1InSize, a1OutSize int64) Cache[K, T] {
+func NewFull2Q[K comparable, T any](amSize, a1InSize, a1OutSize uint64) Cache[K, T] {
 	cache := new(Full2Q[K, T])
 	cache.cache = newNtsFull2Q[K, T](amSize, a1InSize, a1OutSize)
 	return cache
@@ -44,13 +44,13 @@ type ntsFull2Q[K comparable, T any] struct {
 	itemsOut map[K]*list.Node[K]
 	a1out    *list.Queue[K]
 
-	amSize    int64
-	a1InSize  int64
-	a1OutSize int64
-	totalSize int64
+	amSize    uint64
+	a1InSize  uint64
+	a1OutSize uint64
+	totalSize uint64
 }
 
-func newNtsFull2Q[K comparable, T any](amSize, a1InSize, a1OutSize int64) *ntsFull2Q[K, T] {
+func newNtsFull2Q[K comparable, T any](amSize, a1InSize, a1OutSize uint64) *ntsFull2Q[K, T] {
 	return &ntsFull2Q[K, T]{
 		items: make(map[K]*list.Node[cacheEntry2Q[K, T]], amSize+a1InSize),
 		am:    list.NewQueue[cacheEntry2Q[K, T]](),
@@ -110,10 +110,10 @@ func (c *ntsFull2Q[K, T]) put(key K, value T) {
 }
 
 func (c *ntsFull2Q[K, T]) reclaim() {
-	if c.totalSize > int64(c.am.Len()+c.a1in.Len()) {
+	if c.totalSize > uint64(c.am.Len()+c.a1in.Len()) {
 		return //there are free slots
 	}
-	if int64(c.a1in.Len()) > c.a1InSize {
+	if uint64(c.a1in.Len()) > c.a1InSize {
 		y := c.a1in.Dequeue()
 		if nil == y {
 			return
@@ -121,7 +121,7 @@ func (c *ntsFull2Q[K, T]) reclaim() {
 		delete(c.items, y.Value().key)
 		c.a1out.Enqueue(y.Value().key)
 		c.itemsOut[y.Value().key] = c.a1out.Tail()
-		if int64(c.a1out.Len()) > c.a1OutSize {
+		if uint64(c.a1out.Len()) > c.a1OutSize {
 			z := c.a1out.Dequeue()
 			if z != nil {
 				delete(c.itemsOut, z.Value())
