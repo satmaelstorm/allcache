@@ -196,6 +196,7 @@ func (c *ntsMqCache[K, T]) put(key K, value T) {
 			c.q[curQ].Remove(e)
 		} else {
 			e.SetValue(curItem)
+			c.q[curItem.qNum].MoveToBack(e)
 			return
 		}
 	}
@@ -219,6 +220,7 @@ func (c *ntsMqCache[K, T]) get(key K, def T) (T, bool) {
 			c.items[key] = c.q[curItem.qNum].Tail()
 		} else {
 			e.SetValue(curItem)
+			c.q[curItem.qNum].MoveToBack(e)
 		}
 		return curItem.value, true
 	}
